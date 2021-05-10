@@ -1,0 +1,21 @@
+# classroom token
+.abc-classroom.tokens.yml
+# gradebook
+*/**/gradebook.db
+gradebook.db
+*/**/grades.csv
+grades.csv
+
+# classroom roster
+classroom_roster.csv
+
+# cloned and template repositories directories
+template_repos/
+cloned_repos/
+pgm/submitted
+
+# feedback directory
+pgm/feedback
+
+# graded directory
+pgm/autograded
