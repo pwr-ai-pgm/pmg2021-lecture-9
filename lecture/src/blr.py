@@ -56,6 +56,12 @@ class ConjugateBayesLinReg:
     def weights_dist(self):
         return stats.multivariate_normal(mean=self.mean, cov=self.cov)
 
+    def log_likelihood(self, x, y):
+        return np.log(self.predict(x).pdf(y)).sum()
+
+    def likelihood(self, x, y):
+        return np.exp(self.log_likelihood(x, y))
+
 
 class FullConjugateBayesLinReg(ConjugateBayesLinReg):
 
@@ -70,8 +76,8 @@ class FullConjugateBayesLinReg(ConjugateBayesLinReg):
             lmbda_rate=1,
             alpha_init=1,
             lmbda_init=1,
-            fit_intercept=True
     ):
+        self.n_features = n_features
         self.n_iter = n_iter
         self.tol = tol
         self.alpha_shape = alpha_shape
@@ -80,7 +86,7 @@ class FullConjugateBayesLinReg(ConjugateBayesLinReg):
         self.lmbda_rate = lmbda_rate
         self.alpha = alpha_init
         self.lmbda = lmbda_init
-        self.fit_intercept = fit_intercept
+        self.intercept = 0
 
         self.mean = np.zeros((n_features,))
         self.cov = np.eye(n_features) / self.alpha
@@ -91,6 +97,9 @@ class FullConjugateBayesLinReg(ConjugateBayesLinReg):
         x = np.atleast_2d(x)
         y = np.atleast_1d(y)
 
+        self.intercept = np.mean(y)
+        y = y - self.intercept
+
         model = BayesianRidge(
             n_iter=self.n_iter,
             tol=self.tol,
@@ -100,7 +109,7 @@ class FullConjugateBayesLinReg(ConjugateBayesLinReg):
             lambda_2=self.alpha_rate,
             alpha_init=self.lmbda,
             lambda_init=self.alpha,
-            fit_intercept=self.fit_intercept,
+            fit_intercept=False,
             normalize=False,
         )
 
@@ -110,4 +119,3 @@ class FullConjugateBayesLinReg(ConjugateBayesLinReg):
         self.cov = model.sigma_
         self.alpha = model.lambda_
         self.lmbda = model.alpha_
-        self.intercept = model.intercept_
